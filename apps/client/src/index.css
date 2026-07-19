@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+
+  /* Neutral scale — the app's surfaces and text. Deliberately not slate/zinc defaults tinted purple. */
+  --color-ink-50: #f7f7f6;
+  --color-ink-100: #eeeeec;
+  --color-ink-200: #dcdcd8;
+  --color-ink-300: #bfbfb9;
+  --color-ink-400: #98988f;
+  --color-ink-500: #75756b;
+  --color-ink-600: #57574f;
+  --color-ink-700: #40403a;
+  --color-ink-800: #2a2a26;
+  --color-ink-900: #1a1a17;
+  --color-ink-950: #0f0f0d;
+
+  /* Accent — deep teal, used sparingly for primary actions and links. */
+  --color-accent-50: #eefbf9;
+  --color-accent-100: #d4f3ee;
+  --color-accent-200: #a9e7de;
+  --color-accent-300: #74d3c6;
+  --color-accent-400: #43b6a8;
+  --color-accent-500: #2b978c;
+  --color-accent-600: #217a71;
+  --color-accent-700: #1e625c;
+  --color-accent-800: #1b4e4a;
+  --color-accent-900: #17403d;
+
+  /* Status colors — semantic, always paired with icon + text, never color alone. */
+  --color-status-processing: #b4790a;
+  --color-status-processing-bg: #fdf3df;
+  --color-status-completed: #1a7d4f;
+  --color-status-completed-bg: #e3f5eb;
+  --color-status-failed: #b3261e;
+  --color-status-failed-bg: #fbe9e8;
+  --color-status-empty: #6b6b62;
+  --color-status-empty-bg: #f0f0ec;
+}
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  @apply bg-ink-50 text-ink-900 dark:bg-ink-950 dark:text-ink-100;
+}
+
+* {
+  scrollbar-color: var(--color-ink-300) transparent;
+}
+
+:root[data-theme="dark"] * {
+  scrollbar-color: var(--color-ink-700) transparent;
+}
+
+.markdown-body {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--color-ink-800);
+}
+
+:root[data-theme="dark"] .markdown-body {
+  color: var(--color-ink-200);
+}
+
+.markdown-body > * + * {
+  margin-top: 0.85em;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  font-weight: 600;
+  color: var(--color-ink-900);
+  margin-top: 1.4em;
+}
+
+:root[data-theme="dark"] .markdown-body h1,
+:root[data-theme="dark"] .markdown-body h2,
+:root[data-theme="dark"] .markdown-body h3 {
+  color: var(--color-ink-50);
+}
+
+.markdown-body h1 {
+  font-size: 1.25em;
+}
+
+.markdown-body h2 {
+  font-size: 1.125em;
+}
+
+.markdown-body h3 {
+  font-size: 1em;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.25em;
+}
+
+.markdown-body ul {
+  list-style: disc;
+}
+
+.markdown-body ol {
+  list-style: decimal;
+}
+
+.markdown-body li + li {
+  margin-top: 0.35em;
+}
+
+.markdown-body a {
+  color: var(--color-accent-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+:root[data-theme="dark"] .markdown-body a {
+  color: var(--color-accent-400);
+}
+
+.markdown-body code {
+  background: var(--color-ink-100);
+  border-radius: 0.25rem;
+  padding: 0.1em 0.35em;
+  font-size: 0.85em;
+}
+
+:root[data-theme="dark"] .markdown-body code {
+  background: var(--color-ink-800);
+}
+
+.markdown-body blockquote {
+  border-left: 2px solid var(--color-ink-300);
+  padding-left: 0.85em;
+  color: var(--color-ink-600);
+}
+
+:root[data-theme="dark"] .markdown-body blockquote {
+  border-color: var(--color-ink-700);
+  color: var(--color-ink-400);
+}
+
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--color-ink-200);
+  padding: 0.4em 0.6em;
+  text-align: left;
+}
+
+:root[data-theme="dark"] .markdown-body th,
+:root[data-theme="dark"] .markdown-body td {
+  border-color: var(--color-ink-800);
+}

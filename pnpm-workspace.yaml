@@ -1,0 +1,9 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+workspaceProtocol: 'strict'
+allowBuilds:
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  prisma: true
+  unrs-resolver: true

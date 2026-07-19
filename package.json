@@ -1,0 +1,39 @@
+{
+  "name": "updater",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:api": "pnpm --filter @repo/api start:dev",
+    "dev:client": "pnpm --filter @repo/client dev",
+    "build:api": "pnpm --filter @repo/api build",
+    "build:client": "pnpm --filter @repo/client build",
+    "build": "pnpm run build:api && pnpm run build:client",
+    "start:api": "pnpm --filter @repo/api start",
+    "generate": "pnpm --filter @repo/api generate",
+    "start:client": "pnpm --filter @repo/client preview",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "add:client": "pnpm --filter @repo/client add",
+    "add:api": "pnpm --filter @repo/api add",
+    "remove:client": "pnpm --filter @repo/client remove",
+    "remove:api": "pnpm --filter @repo/api remove",
+    "watch-shared": "pnpm --filter @repo/shared build --watch",
+    "migrate": "pnpm --filter @repo/api migrate"
+  },
+  "devDependencies": {
+    "@types/passport-jwt": "^4.0.1",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@nestjs/passport": "^11.0.5",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "zod": "^4.4.3"
+  }
+}

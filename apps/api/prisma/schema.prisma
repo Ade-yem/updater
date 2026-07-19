@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "cjs" 
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Digest status enum. Must be kept in sync with @repo/shared DigestDtoSchema.status values
+enum DigestStatus {
+  processing
+  completed
+  failed
+  no_emails
+}
+
+/// Core App Account representing a system user.
+model User {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String      @unique
+  name       String?
+  image      String?
+  passwordHash  String?
+  isActive   Boolean     @default(true) @map("is_active")
+  digestTime Int         @default(6) @map("digest_time")
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  
+  // Relations
+  googleAuth        GoogleAuth?
+  digests           Digest[]
+  pushSubscriptions PushSubscription[]
+
+  @@map("users")
+}
+
+/// Isolated Google Credentials Table.
+/// Kept separate to prevent accidental token exposure during basic user queries.
+model GoogleAuth {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @unique @map("user_id") @db.Uuid
+  googleId     String   @unique @map("google_id")
+  refreshToken String   @map("refresh_token") // Securely encrypt this string field in your service layer
+  scopes       String[]
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("google_auths")
+}
+
+/// Daily Digests & Summaries Table.
+/// Built to quickly serve current and historical views to the PWA frontend.
+model Digest {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  digestDate      DateTime @map("digest_date") @db.Date // Tracks the calendar day (e.g., 2026-07-13)
+  summaryMarkdown String        @map("summary_markdown") @db.Text
+  linksProcessed  Json          @default("[]") @map("links_processed") // Holds raw array: [{url, title, summary}]
+  status          DigestStatus  @default(processing) // synchronized with DigestDtoSchema in @repo/shared
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Constraints & Optimization Indexes
+  @@unique([userId, digestDate], name: "unique_user_digest_date")
+  @@index([userId, digestDate(sort: Desc)], map: "idx_digests_user_date")
+  @@map("digests")
+}
+
+/// Web Push subscription endpoints registered by a user's browser.
+/// A user may have several (different browsers/devices); each browser
+/// endpoint is globally unique per the Push API spec.
+model PushSubscription {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  endpoint  String   @unique @db.Text
+  p256dh    String   @db.Text
+  auth      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_push_subscriptions_user")
+  @@map("push_subscriptions")
+}
