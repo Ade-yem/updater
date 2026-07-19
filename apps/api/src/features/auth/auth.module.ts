@@ -12,7 +12,7 @@ import { GoogleModule } from '../google/google.module';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: ENV.JWT_SECRET || 'fallback-secret',
+      secret: ENV.JWT_SECRET,
       signOptions: { expiresIn: '1d' },
     }),
     UsersModule,

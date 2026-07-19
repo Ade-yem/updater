@@ -14,8 +14,6 @@ export class CronController {
   @Post('update')
   async triggerHourlyUpdate(@Headers('x-cron-secret') cronSecret: string) {
     // Basic guard verification to ensure only your authorized external task manager triggers this
-    console.log("Cron secret: ", ENV.CRON_SECRET_KEY)
-    console.log("Incoming: ", cronSecret)
     if (cronSecret !== ENV.CRON_SECRET_KEY) {
       throw new UnauthorizedException('Invalid cron security credentials.');
     }

@@ -19,11 +19,11 @@ import { GoogleAuthRepository } from '../google/google.service';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private oauth2Client = new google.auth.OAuth2(
-    ENV.GOOGLE_CLIENT_ID,
-    ENV.GOOGLE_CLIENT_SECRET,
-    `${ENV.APP_URL}/auth/google/callback`,
-  );
+  private oauth2Client = new google.auth.OAuth2({
+    clientId:  ENV.GOOGLE_CLIENT_ID,
+    clientSecret: ENV.GOOGLE_CLIENT_SECRET,
+    redirectUri: `${ENV.APP_URL}/auth/google/callback`,
+  });
   constructor(
     private jwtService: JwtService,
     private userService: UserService,

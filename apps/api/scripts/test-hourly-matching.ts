@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../src/prisma/prisma.service';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaService();
 
 async function debugHourlyWindowQuery() {
   const currentUTCHours = new Date().getUTCHours();

@@ -7,7 +7,6 @@ import { useVoiceAnnouncements } from '../hooks/useVoiceAnnouncements';
 import { useNotifications } from '../hooks/useNotifications';
 import { DigestContext, type HistoryState, type LiveStatus } from './digest-context';
 
-const POLL_INTERVAL_MS = 10_000;
 const HISTORY_PAGE_SIZE = 10;
 
 export function DigestProvider({ children }: { children: ReactNode }) {
@@ -66,17 +65,17 @@ export function DigestProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Initial + polling fetch of today's digest while authenticated.
-  useEffect(() => {
-    if (authStatus !== 'authenticated') return;
+  // useEffect(() => {
+  //   if (authStatus !== 'authenticated') return;
 
-    const poll = () => {
-      refreshToday();
-    };
+  //   const poll = () => {
+  //     refreshToday();
+  //   };
 
-    poll();
-    const interval = setInterval(poll, POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
-  }, [authStatus, refreshToday]);
+  //   poll();
+  //   const interval = setInterval(poll, POLL_INTERVAL_MS);
+  //   return () => clearInterval(interval);
+  // }, [authStatus, refreshToday]);
 
   // SSE connection with capped exponential backoff reconnect.
   const retryDelayRef = useRef(1000);

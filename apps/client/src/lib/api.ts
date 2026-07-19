@@ -32,7 +32,7 @@ export class ApiError extends Error {
 export const UNAUTHORIZED_EVENT = 'api:unauthorized';
 
 interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   body?: unknown;
   auth?: boolean;
 }
@@ -128,6 +128,21 @@ export const pushApi = {
 
   unsubscribe: (endpoint: string) =>
     request<ApiResponse<null>>('/push/unsubscribe', { method: 'POST', body: { endpoint } }),
+};
+
+export const userApi = {
+  getProfile: async () => {
+    const res = await request<ApiResponse<UserDto>>('/users/me');
+    return res.data;
+  },
+
+  updateProfile: async (data: Partial<UserDto>) => {
+    const res = await request<ApiResponse<UserDto>>('/users/me', {
+      method: 'PATCH',
+      body: data,
+    });
+    return res.data;
+  },
 };
 
 /** DigestDto's date fields are typed as `Date` but arrive over JSON as ISO strings. */

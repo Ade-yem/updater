@@ -6,7 +6,6 @@ import { AuthContext, type AuthStatus, type AuthUser } from './auth-context';
 function buildUserFromToken(token: string, extra?: { name?: string; image?: string | null }): AuthUser | null {
   const payload = decodeJwt(token);
   if (!payload || isTokenExpired(payload)) return null;
-  console.log(payload)
   return {
     id: payload.sub,
     email: payload.email,

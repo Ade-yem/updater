@@ -32,7 +32,6 @@ const IV_LENGTH = 12;
 
 function getEncryptionKey(): Buffer {
   const keyHex = ENV.ENCRYPTION_KEY;
-  console.log("Length of the key: ", keyHex.length);
   if (!keyHex || keyHex.length !== 64) {
     throw new Error('ENCRYPTION_KEY is not set in the environment variables.');
   }
@@ -46,7 +45,7 @@ export function encryptToken(data: string): string {
   let encrypted = cipher.update(data, 'utf8', 'hex');
   encrypted += cipher.final('hex');
   const authTag = cipher.getAuthTag().toString('hex');
-  return `${iv.toString('hex')}${authTag}:${encrypted}`;
+  return `${iv.toString('hex')}:${authTag}:${encrypted}`;
 }
 
 /**
@@ -54,9 +53,24 @@ export function encryptToken(data: string): string {
  */
 export function decryptToken(encryptedPayload: string): string {
   const secretKey = getEncryptionKey();
-  const [ivHex, authTagHex, encryptedHex] = encryptedPayload.split(':');
+  
+  const parts = encryptedPayload.split(':');
+  let ivHex: string;
+  let authTagHex: string;
+  let encryptedHex: string;
 
-  if (!ivHex || !authTagHex || !encryptedHex) {
+  if (parts.length === 3) {
+    [ivHex, authTagHex, encryptedHex] = parts;
+  } else if (parts.length === 2) {
+    const combined = parts[0];
+    encryptedHex = parts[1];
+    ivHex = combined.substring(0, 24); // IV_LENGTH * 2 = 24 hex characters
+    authTagHex = combined.substring(24);
+  } else {
+    throw new Error('Invalid encrypted token format.');
+  }
+
+  if (!ivHex || !authTagHex || !encryptedHex || ivHex.length !== 24 || authTagHex.length !== 32) {
     throw new Error('Invalid encrypted token format.');
   }
 

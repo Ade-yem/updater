@@ -7,6 +7,7 @@ import { LoginPage } from './pages/LoginPage';
 import { DigestTodayPage } from './pages/DigestTodayPage';
 import { DigestHistoryPage } from './pages/DigestHistoryPage';
 import { DigestDetailPage } from './pages/DigestDetailPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
                 <Route path="/digest/today" element={<DigestTodayPage />} />
                 <Route path="/digest/history" element={<DigestHistoryPage />} />
                 <Route path="/digest/history/:id" element={<DigestDetailPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
               </Route>
             </Route>
 

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { google } from 'googleapis';
+import { google} from 'googleapis';
 import { GoogleAuthRepository } from './google.service';
 import { ENV } from '../../config/env';
 import { withRetry } from '../../common/utils/retry';
@@ -33,11 +33,11 @@ export class GmailService {
       await this.googleAuthRepo.getDecryptedRefreshToken(userId);
 
     // 2. Initialize the Google OAuth2 client with backend environment secrets
-    const oauth2Client = new google.auth.OAuth2(
-      ENV.GOOGLE_CLIENT_ID,
-      ENV.GOOGLE_CLIENT_SECRET,
-      ENV.GOOGLE_REDIRECT_URI,
-    );
+    const oauth2Client = new google.auth.OAuth2({
+      clientId: ENV.GOOGLE_CLIENT_ID,
+      clientSecret: ENV.GOOGLE_CLIENT_SECRET,
+      redirectUri: ENV.GOOGLE_REDIRECT_URI,
+    });
 
     oauth2Client.setCredentials({ refresh_token: decryptedRefreshToken });
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });

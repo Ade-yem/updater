@@ -31,6 +31,9 @@ export function Navbar() {
             <NavLink to="/digest/history" className={navLinkClasses}>
               History
             </NavLink>
+            <NavLink to="/settings" className={navLinkClasses}>
+              Settings
+            </NavLink>
           </nav>
         </div>
 
@@ -75,9 +78,12 @@ export function Navbar() {
           </button>
 
           {user?.email && (
-            <span className="hidden max-w-[10rem] truncate text-sm text-ink-500 dark:text-ink-400 sm:inline">
+            <NavLink
+              to="/settings"
+              className="hidden max-w-[10rem] truncate text-sm text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 sm:inline"
+            >
               {user.name || user.email}
-            </span>
+            </NavLink>
           )}
 
           <button

@@ -89,6 +89,17 @@ export class UserService {
     });
   }
 
+  async updateUser(id: string, data: Partial<User>): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        name: data.name,
+        isActive: data.isActive,
+        digestTime: data.digestTime,
+      },
+    });
+  }
+
   async findUsersDueForDigest(hour: number): Promise<User[]> {
     return this.prisma.user.findMany({
       where: { isActive: true, digestTime: hour, googleAuth: { isNot: null } },

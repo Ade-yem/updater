@@ -31,6 +31,8 @@ async function runStandaloneGmailTest() {
       console.log(`[Email #${index + 1}]`);
       console.log(`From:    ${email.from}`);
       console.log(`Subject: ${email.subject}`);
+      console.log(`Snippet: ${email.snippet}`);
+      console.log(`Body: ${email.body}`);
       console.log(`Links Found (${email.urls.length}):`, email.urls.slice(0, 3)); // show first 3
       console.log('-'.repeat(40));
     });
