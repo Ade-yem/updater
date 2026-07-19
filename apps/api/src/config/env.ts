@@ -11,9 +11,12 @@ export const ENV = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
   GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || '',
+
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY || '',
-  JWT_SECRET: process.env.JWT_SECRET || 'fallback-secret',
+  JWT_SECRET: process.env.JWT_SECRET,
+
   CRON_SECRET_KEY: process.env.CRON_SECRET_KEY || '',
+  
   PORT: process.env.PORT || '3000',
   NODE_ENV: process.env.NODE_ENV || 'development',
   // Generate a pair with: node -e "console.log(require('web-push').generateVAPIDKeys())"
