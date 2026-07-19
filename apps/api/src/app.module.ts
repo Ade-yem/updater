@@ -8,6 +8,7 @@ import { DigestModule } from './features/digest/digest.module';
 import { CronModule } from './features/cron/cron.module';
 import { PushModule } from './features/push/push.module';
 import {ConfigModule} from '@nestjs/config'
+import { HealthModule } from './features/health/health.module';
 
 // Modules
 @Module({
@@ -20,6 +21,7 @@ import {ConfigModule} from '@nestjs/config'
     DigestModule,
     CronModule,
     PushModule,
+    HealthModule,
     ConfigModule.forRoot({ isGlobal: true }), PrismaModule
   ],
   controllers: [],
