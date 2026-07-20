@@ -1,4 +1,4 @@
-# Monorepo
+# Digest - Daily Digest
 
 A full-stack monorepo with shared libraries, a React client, and a NestJS API.
 
