@@ -91,7 +91,7 @@ describe('PushService', () => {
       userId: 'user-1',
       digestDate: new Date(),
       summaryMarkdown: 'summary',
-      linksProcessed: [{ url: 'https://a.com', keyPoints: [] }],
+      linksProcessed: [{ url: 'https://a.com', summary: 'A summary of the linked article.' }],
       status: 'completed',
       createdAt: new Date(),
       updatedAt: new Date(),

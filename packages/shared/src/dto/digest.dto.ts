@@ -2,8 +2,9 @@ import { z } from 'zod';
 
 export const LinkSummarySchema = z.object({
   url: z.string().url(),
+  anchorText: z.string().optional(),
   title: z.string().optional(),
-  keyPoints: z.array(z.string()).optional().default([]),
+  summary: z.string().optional(),
 });
 
 export type LinkSummary = z.infer<typeof LinkSummarySchema>;

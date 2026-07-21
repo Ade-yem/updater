@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import type { DigestDto } from '@repo/shared';
 import { ApiError, digestApi, toDate } from '../lib/api';
 import { DigestSummary } from '../components/DigestSummary';
-import { LinkSummaryCard } from '../components/LinkSummaryCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { DigestSkeleton, EmptyState, ErrorState } from '../components/StateViews';
 import { ChevronLeftIcon } from '../components/icons';
@@ -70,19 +69,6 @@ export function DigestDetailPage() {
           )}
 
           {digest.status === 'no_emails' && <EmptyState title="No emails that day" />}
-
-          {digest.status === 'completed' && digest.linksProcessed.length > 0 && (
-            <div>
-              <h2 className="mb-3 text-sm font-semibold text-ink-700 dark:text-ink-300">
-                Links mentioned ({digest.linksProcessed.length})
-              </h2>
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {digest.linksProcessed.map((link) => (
-                  <LinkSummaryCard key={link.url} link={link} />
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       )}
     </div>

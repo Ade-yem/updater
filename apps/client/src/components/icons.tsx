@@ -170,3 +170,38 @@ export function SpeakerOffIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function MailIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m2 6 10 7 10-7" />
+    </svg>
+  );
+}
+
+export function LockIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <rect x="4" y="11" width="16" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
+export function UserIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+    </svg>
+  );
+}
+
+export function SpinnerIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base(props)} className={`animate-spin ${props.className ?? ''}`}>
+      <path d="M21 12a9 9 0 1 1-9-9" />
+    </svg>
+  );
+}

@@ -31,6 +31,8 @@ export interface DigestContextValue {
   today: DigestDto | null | undefined;
   todayError: string | null;
   refreshToday: () => Promise<void>;
+  triggerRefresh: () => Promise<void>;
+  isRefreshing: boolean;
   liveStatus: LiveStatus;
   liveError: string | null;
   sseConnected: boolean;

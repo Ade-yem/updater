@@ -4,21 +4,21 @@ export async function mapWithConcurrency<T, R>(
   fn: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
   const results: R[] = new Array(items.length);
-  const executing: Promise<void>[] = [];
+  const executing = new Set<Promise<void>>();
 
   for (let index = 0; index < items.length; index++) {
-    const promise = Promise.resolve().then(async () => {
-      results[index] = await fn(items[index], index);
+    // Remove `p` from the tracking set only once IT settles (via the closure
+    // reference below), not whichever promise happens to be racing when the
+    // concurrency gate is checked — removing the wrong one lets Promise.all
+    // return before every item has actually written to `results`, leaving holes.
+    const p: Promise<void> = fn(items[index], index).then((result) => {
+      results[index] = result;
+      executing.delete(p);
     });
+    executing.add(p);
 
-    executing.push(promise);
-
-    if (executing.length >= limit) {
+    if (executing.size >= limit) {
       await Promise.race(executing);
-      executing.splice(
-        executing.findIndex((p) => p === promise),
-        1,
-      );
     }
   }
 

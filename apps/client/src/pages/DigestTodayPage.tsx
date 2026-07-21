@@ -2,7 +2,6 @@ import { useDigest } from '../hooks/useDigest';
 import { toDate } from '../lib/api';
 import { StatusBadge } from '../components/StatusBadge';
 import { DigestSummary } from '../components/DigestSummary';
-import { LinkSummaryCard } from '../components/LinkSummaryCard';
 import { DigestSkeleton, EmptyState, ErrorState } from '../components/StateViews';
 import { ClockIcon, RefreshIcon } from '../components/icons';
 
@@ -13,9 +12,10 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 });
 
 export function DigestTodayPage() {
-  const { today, todayError, refreshToday, liveStatus } = useDigest();
+  const { today, todayError, refreshToday, triggerRefresh, isRefreshing, liveStatus } = useDigest();
 
   const headerDate = today ? toDate(today.digestDate) : new Date();
+  const isBusy = isRefreshing || liveStatus === 'processing';
 
   return (
     <div>
@@ -28,11 +28,13 @@ export function DigestTodayPage() {
           <StatusBadge status={liveStatus} />
           <button
             type="button"
-            onClick={refreshToday}
-            aria-label="Refresh digest"
-            className="rounded-md p-1.5 text-ink-500 hover:bg-ink-100 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-100"
+            onClick={() => triggerRefresh().catch(() => {})}
+            disabled={isBusy}
+            aria-label={isBusy ? 'Digest generation in progress' : 'Generate digest now'}
+            title={isBusy ? 'Generating…' : 'Generate digest now'}
+            className="rounded-md p-1.5 text-ink-500 hover:bg-ink-100 hover:text-ink-900 disabled:cursor-not-allowed disabled:opacity-50 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-100"
           >
-            <RefreshIcon className="h-4 w-4" />
+            <RefreshIcon className={`h-4 w-4 ${isBusy ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -72,19 +74,6 @@ export function DigestTodayPage() {
       {today && today.status === 'completed' && (
         <div className="space-y-8">
           <DigestSummary markdown={today.summaryMarkdown} />
-
-          {today.linksProcessed.length > 0 && (
-            <div>
-              <h2 className="mb-3 text-sm font-semibold text-ink-700 dark:text-ink-300">
-                Links mentioned ({today.linksProcessed.length})
-              </h2>
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {today.linksProcessed.map((link) => (
-                  <LinkSummaryCard key={link.url} link={link} />
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       )}
     </div>

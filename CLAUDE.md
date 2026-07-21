@@ -52,9 +52,9 @@ pnpm test:e2e                # e2e tests via test/jest-e2e.json
 
 - Nest feature-module convention: each feature lives in `src/features/<name>/` with `<name>.module.ts`, `<name>.controller.ts`, `<name>.service.ts`, `<name>.spec.ts`. Register new feature modules in `src/app.module.ts`'s `imports`.
 - `src/config/env.ts` exports a single `ENV` object reading `process.env` — add new environment variables here rather than calling `process.env` directly in feature code.
-- `src/common/` holds shared low-level clients: `openai-client.ts` (OpenAI SDK client pointed at Gemini's OpenAI-compatible endpoint via `ENV.GEMINI_API_URL`/`GEMINI_API_KEY`) and `gmail.ts` (googleapis Gmail client, currently scoped to `gmail.readonly`).
+- `src/common/` holds shared low-level clients: `openai-client.ts` (OpenAI SDK client pointed at deepseek's OpenAI-compatible endpoint via `ENV.DEEPSEEK_API_URL`/`DEEPSEEK_API_KEY`) and `gmail.ts` (googleapis Gmail client, currently scoped to `gmail.readonly`).
 - Path alias `@/` maps to `src/` (configured in `apps/api/tsconfig.json` and `tsconfig-build.json`) — import internal modules as `@/config/env`, `@/common/gmail`, etc.
-- The LLM is actually Gemini, accessed through the OpenAI-compatible SDK/baseURL, not OpenAI directly — keep this in mind when reasoning about model names/capabilities.
+- The LLM is actually DEEPSEEK, accessed through the OpenAI-compatible SDK/baseURL, not OpenAI directly — keep this in mind when reasoning about model names/capabilities.
 - Per todo.md: one-off/manual test scripts for new integrations (Gmail, LLM calls, scraping) belong in a `scripts` directory before writing them into code. Then we run full tests individually for each feature through Jest, to validate implementations after wiring them into endpoints. `tsconfig-build.json` already excludes `scripts` from the Nest build.
 
 ## Backend Status
@@ -69,7 +69,7 @@ pnpm test:e2e                # e2e tests via test/jest-e2e.json
 - ✅ Shared types finalized: `UserDto`, `SSEEvent`, `DigestDto`, `LinkSummary` (with Zod schemas)
 - ✅ Prisma migrated: `DigestStatus` enum added, `findUsersDueForDigest()` implemented
 - ✅ Utility layer: `retry.ts` (exponential backoff), `concurrency.ts` (bounded worker pool)
-- ✅ Agent module: `AgentService` (LLM summarization via Gemini), `ScraperService` (URL scraping with cheerio)
+- ✅ Agent module: `AgentService` (LLM summarization via DEEPSEEK), `ScraperService` (URL scraping with cheerio)
 - ✅ Auth guards: `JwtAuthGuard`, `AuthenticatedRequest` type
 - ✅ Build: Full backend compiles cleanly
 

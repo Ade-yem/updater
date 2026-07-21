@@ -2,6 +2,7 @@ import type { AuthenticatedRequest } from '../../common/types/authenticated-requ
 import {
   Controller,
   Get,
+  Post,
   Param,
   Query,
   UseGuards,
@@ -11,12 +12,33 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { DigestService } from './digest.service';
+import { DigestOrchestratorService } from './digest-orchestrator.service';
 import { ApiResponse, DigestDto, DigestQueryParamsSchema } from '@repo/shared';
 
 @Controller('digests')
 @UseGuards(JwtAuthGuard)
 export class DigestController {
-  constructor(private digestService: DigestService) {}
+  constructor(
+    private digestService: DigestService,
+    private orchestrator: DigestOrchestratorService,
+  ) {}
+
+  @Post('refresh')
+  async refresh(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<{ triggered: boolean }>> {
+    // Fire-and-forget, matching CronController's pattern — progress is
+    // reported via the SSE channel (digest.started/completed/failed/no_emails),
+    // not this HTTP response.
+    this.orchestrator.processUserDigest(req.user.id, { force: true });
+
+    return {
+      data: { triggered: true },
+      message: 'Digest refresh started',
+      error: null,
+      success: true,
+    };
+  }
 
   @Get('today')
   async getToday(

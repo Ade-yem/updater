@@ -16,6 +16,7 @@ export function DigestProvider({ children }: { children: ReactNode }) {
 
   const [today, setToday] = useState<DigestDto | null | undefined>(undefined);
   const [todayError, setTodayError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [liveStatus, setLiveStatus] = useState<LiveStatus>('idle');
   const [liveError, setLiveError] = useState<string | null>(null);
   const [sseConnected, setSseConnected] = useState(false);
@@ -39,6 +40,22 @@ export function DigestProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       setTodayError(err instanceof Error ? err.message : 'Failed to load today’s digest.');
+    }
+  }, []);
+
+  const triggerRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    setLiveError(null);
+    try {
+      await digestApi.refresh();
+      // Don't clear isRefreshing here on success — the SSE 'digest.started'
+      // event flips liveStatus to 'processing', and the terminal events
+      // (completed/failed/no_emails) clear isRefreshing. Clearing it on the
+      // POST resolving would race ahead of 'digest.started' arriving.
+    } catch (err) {
+      setIsRefreshing(false);
+      setLiveError(err instanceof Error ? err.message : 'Failed to start digest refresh.');
+      throw err;
     }
   }, []);
 
@@ -92,17 +109,21 @@ export function DigestProvider({ children }: { children: ReactNode }) {
         case 'digest.started':
           setLiveStatus('processing');
           setLiveError(null);
+          setIsRefreshing(true);
           break;
         case 'digest.no_emails':
           setLiveStatus('no_emails');
+          setIsRefreshing(false);
           break;
         case 'digest.completed':
           setLiveStatus('completed');
+          setIsRefreshing(false);
           refreshToday();
           voice.speak('Your digest is ready.');
           break;
         case 'digest.failed':
           setLiveStatus('failed');
+          setIsRefreshing(false);
           setLiveError(event.error ?? 'Digest generation failed.');
           break;
       }
@@ -143,6 +164,8 @@ export function DigestProvider({ children }: { children: ReactNode }) {
       today,
       todayError,
       refreshToday,
+      triggerRefresh,
+      isRefreshing,
       liveStatus,
       liveError,
       sseConnected,
@@ -151,7 +174,20 @@ export function DigestProvider({ children }: { children: ReactNode }) {
       voice,
       push,
     }),
-    [today, todayError, refreshToday, liveStatus, liveError, sseConnected, history, fetchHistory, voice, push],
+    [
+      today,
+      todayError,
+      refreshToday,
+      triggerRefresh,
+      isRefreshing,
+      liveStatus,
+      liveError,
+      sseConnected,
+      history,
+      fetchHistory,
+      voice,
+      push,
+    ],
   );
 
   return <DigestContext.Provider value={value}>{children}</DigestContext.Provider>;

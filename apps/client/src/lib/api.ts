@@ -115,6 +115,11 @@ export const digestApi = {
     const res = await request<ApiResponse<DigestDto>>(`/digests/${id}`);
     return res.data;
   },
+
+  refresh: async () => {
+    const res = await request<ApiResponse<{ triggered: boolean }>>('/digests/refresh', { method: 'POST' });
+    return res.data;
+  },
 };
 
 export const pushApi = {

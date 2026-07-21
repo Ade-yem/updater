@@ -1,8 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { google} from 'googleapis';
+import * as cheerio from 'cheerio';
 import { GoogleAuthRepository } from './google.service';
 import { ENV } from '../../config/env';
 import { withRetry } from '../../common/utils/retry';
+
+export interface ExtractedLink {
+  url: string;
+  anchorText: string;
+}
 
 export interface ExtractedEmail {
   id: string;
@@ -10,15 +16,29 @@ export interface ExtractedEmail {
   from: string;
   snippet: string;
   body: string;
-  urls: string[];
+  urls: ExtractedLink[];
 }
 
 @Injectable()
 export class GmailService {
   private readonly logger = new Logger(GmailService.name);
 
-  // A standard regular expression to isolate URLs embedded in the email body
-  private readonly urlRegex = /https?:\/\/[^\s<>'"]+/g;
+  // Mailing-list infra, asset hosts, analytics, social platforms, unsubscribe/preferences links.
+  private readonly JUNK_HOST_RE =
+    /(list-manage|mailchimp|sendgrid|sparkpost|mcusercontent|beehiiv\.com\/cdn|s2\/favicons|doubleclick|googletagmanager|google-analytics|facebook\.com|twitter\.com|x\.com|instagram\.com|linkedin\.com|youtube\.com|\.gif|\.png|\.jpe?g|\.svg|\.webp|unsubscribe|opt-out|optout|preferences|manage-subscription|mailto:)/i;
+
+  // Open/click-tracking beacon path shapes. Deliberately narrow: many ESPs (SmartBrief,
+  // Bloomberg, Google News, TechCrunch) route every real article link through a per-provider
+  // redirect/tracking wrapper, so a broad redirect-path blocklist would kill legitimate
+  // content along with junk. Anchor-text quality (length + not-generic) does the real
+  // filtering work below; this only catches unambiguous non-content beacons.
+  private readonly TRACKER_PATH_RE = /(\/open\.aspx|\/track\/open|beacon\.gif|pixel\.gif)/i;
+
+  // Boilerplate CTA text that carries no headline value even when long enough to pass the length check.
+  private readonly GENERIC_ANCHOR_TEXT_RE =
+    /^(click here|read more|view in browser|view online|learn more|here|link|this link|unsubscribe|manage preferences|update preferences|view web version)$/i;
+
+  private readonly MIN_ANCHOR_TEXT_LENGTH = 12;
 
   constructor(private readonly googleAuthRepo: GoogleAuthRepository) {}
 
@@ -117,8 +137,9 @@ export class GmailService {
     // Extract textual body content from multipart structures
     const rawBody = this.extractBodyText(payload.payload);
 
-    // Parse any actionable hyperlinks found in the body text string
-    const urls = this.extractUrls(rawBody);
+    // Extract real article/headline links straight from the HTML anchor tags
+    const rawHtml = this.extractRawHtml(payload.payload);
+    const urls = this.extractLinksFromHtml(rawHtml);
 
     return {
       id,
@@ -160,11 +181,50 @@ export class GmailService {
   }
 
   /**
-   * Matches string tokens up against regular expressions to assemble localized arrays of unique target links.
+   * Traverses multipart sub-payload branches collecting RAW (unstripped) HTML,
+   * since real hyperlinks live in <a href> attributes that get destroyed by
+   * extractBodyText's tag-stripping fallback.
    */
-  private extractUrls(text: string): string[] {
-    const matches = text.match(this.urlRegex) || [];
-    // Filter down to unique matches to avoid scraping duplicate links
-    return Array.from(new Set(matches));
+  private extractRawHtml(part: any): string {
+    if (!part) return '';
+
+    if (part.mimeType === 'text/html' && part.body?.data) {
+      return Buffer.from(part.body.data, 'base64').toString('utf8');
+    }
+
+    if (part.parts && Array.isArray(part.parts)) {
+      return part.parts.map((subPart: any) => this.extractRawHtml(subPart)).join('');
+    }
+
+    return '';
+  }
+
+  /**
+   * Extracts {url, anchorText} pairs from raw HTML <a href> tags, filtering out
+   * trackers, unsubscribe/social links, and boilerplate CTAs with no headline value.
+   */
+  private extractLinksFromHtml(html: string): ExtractedLink[] {
+    if (!html) return [];
+
+    const $ = cheerio.load(html);
+    const seen = new Set<string>();
+    const out: ExtractedLink[] = [];
+
+    $('a[href]').each((_, el) => {
+      const href = ($(el).attr('href') || '').trim();
+      const anchorText = $(el).text().replace(/\s+/g, ' ').trim();
+
+      if (!/^https?:\/\//i.test(href)) return;
+      if (this.JUNK_HOST_RE.test(href)) return;
+      if (this.TRACKER_PATH_RE.test(href)) return;
+      if (seen.has(href)) return;
+      if (anchorText.length < this.MIN_ANCHOR_TEXT_LENGTH) return;
+      if (this.GENERIC_ANCHOR_TEXT_RE.test(anchorText)) return;
+
+      seen.add(href);
+      out.push({ url: href, anchorText });
+    });
+
+    return out;
   }
 }
